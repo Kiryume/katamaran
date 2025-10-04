@@ -1,12 +1,23 @@
-use crate::lexer::{
-    LexerCursor,
-    types::{Op, Token, TokenKind},
-};
+use core::fmt;
 
-#[derive(Debug, PartialEq)]
+use crate::lexer::types::{Op, Token, TokenKind};
+
+#[derive(PartialEq)]
 pub struct TokenTree {
     pub kind: TokenTreeKind,
     pub pos: (usize, usize),
+}
+
+impl fmt::Debug for TokenTree {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        #[derive(Debug)]
+        struct TokenTree<'a> {
+            kind: &'a TokenTreeKind,
+        }
+
+        let Self { kind, pos: _ } = self;
+        TokenTree { kind }.fmt(f)
+    }
 }
 
 #[derive(PartialEq, Debug)]
