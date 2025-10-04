@@ -1,0 +1,15 @@
+struct Ident {
+    field: Type,
+    field2: Type2,
+    field3: Type3,
+}
+
+func main(ident: Type, ident: Type) {
+    bind c = Ident::new(),
+    bind re c = {
+		iden + iden
+	}
+	if iden == iden {
+		c = "Ahoj"
+	}
+}
