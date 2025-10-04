@@ -8,13 +8,13 @@ pub struct Token {
 
 #[derive(Debug)]
 pub enum TokenKind {
-    Bind,
-    Re,
+    Be,
+    Mut,
     If,
     Else,
     While,
     // For,
-    Func,
+    Fn,
     Return,
 
     Struct,
@@ -43,6 +43,8 @@ pub enum TokenKind {
 
 #[derive(PartialEq, Debug)]
 pub enum Op {
+    Pipe,
+
     Plus,
     Minus,
     Multiply,

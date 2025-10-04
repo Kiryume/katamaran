@@ -22,13 +22,13 @@ impl fmt::Debug for TokenTree {
 
 #[derive(PartialEq, Debug)]
 pub enum TokenTreeKind {
-    Bind,
-    Re,
+    Be,
+    Mut,
     If,
     Else,
     While,
     // For,
-    Func,
+    Fn,
     Return,
 
     Struct,
@@ -77,12 +77,12 @@ impl TokenTree {
         iter: &mut impl Iterator<Item = Token>,
     ) -> Result<TokenTree, String> {
         let kind = match token.kind {
-            TokenKind::Bind => TokenTreeKind::Bind,
-            TokenKind::Re => TokenTreeKind::Re,
+            TokenKind::Be => TokenTreeKind::Be,
+            TokenKind::Mut => TokenTreeKind::Mut,
             TokenKind::If => TokenTreeKind::If,
             TokenKind::Else => TokenTreeKind::Else,
             TokenKind::While => TokenTreeKind::While,
-            TokenKind::Func => TokenTreeKind::Func,
+            TokenKind::Fn => TokenTreeKind::Fn,
             TokenKind::Return => TokenTreeKind::Return,
 
             TokenKind::Struct => TokenTreeKind::Struct,

@@ -1,15 +1,28 @@
 struct Ident {
     field: Type,
-    field2: Type2,
+    field2: Type2<T>,
     field3: Type3,
 }
 
-func main(ident: Type, ident: Type) {
-    bind c = Ident::new(),
-    bind re c = {
-		iden + iden
+enum Ident {
+    Variant(Type),
+	Variant2 {
+		field: Type,
+		field: Type<T>,
+	}
+}
+
+fn main(ident: Type, ident: Type) {
+    be c = Ident::new();
+    be mut c = {
+		iden + idenl
 	}
 	if iden == iden {
-		c = "Ahoj"
+		c = "Ahoj";
 	}
+	bind re f = fn(ident: Type, indent: Type) => ident + ident;
+	let c = ident() |>
+		ident() |>
+		ident(_) |>
+		ident(c, _);
 }

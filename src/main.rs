@@ -1,4 +1,5 @@
 mod lexer;
+mod parser;
 mod tokentree;
 use clap::Parser;
 

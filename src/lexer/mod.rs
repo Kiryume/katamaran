@@ -125,14 +125,17 @@ impl Iterator for LexerCursor<'_> {
                     TokenKind::Op(Op::BitAnd)
                 }
             }
-            '|' => {
-                if self.peek() == Some('|') {
+            '|' => match self.peek() {
+                Some('|') => {
                     self.bump();
                     TokenKind::Op(Op::Or)
-                } else {
-                    TokenKind::Op(Op::BitOr)
                 }
-            }
+                Some('>') => {
+                    self.bump();
+                    TokenKind::Op(Op::Pipe)
+                }
+                _ => TokenKind::Op(Op::BitOr),
+            },
             '^' => TokenKind::Op(Op::BitXor),
             '~' => TokenKind::Op(Op::BitNot),
             '"' => {
@@ -177,12 +180,12 @@ impl Iterator for LexerCursor<'_> {
                 let mut ident_str = c.to_string();
                 ident_str.push_str(self.eat_while(|ch| ch.is_ascii_alphanumeric() || ch == '_'));
                 match ident_str.as_str() {
-                    "bind" => TokenKind::Bind,
-                    "re" => TokenKind::Re,
+                    "be" => TokenKind::Be,
+                    "mut" => TokenKind::Mut,
                     "if" => TokenKind::If,
                     "else" => TokenKind::Else,
                     "while" => TokenKind::While,
-                    "func" => TokenKind::Func,
+                    "fn" => TokenKind::Fn,
                     "return" => TokenKind::Return,
                     "true" => TokenKind::Boolean(true),
                     "false" => TokenKind::Boolean(false),
