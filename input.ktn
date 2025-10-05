@@ -12,7 +12,7 @@ enum Ident {
 	}
 }
 
-fn main(ident: Type, ident: Type) {
+fn main(ident: Type, ident: Type): () {
     be c = Ident::new();
     be mut c = {
 		iden + idenl
@@ -20,7 +20,7 @@ fn main(ident: Type, ident: Type) {
 	if iden == iden {
 		c = "Ahoj";
 	}
-	bind re f = fn(ident: Type, indent: Type) => ident + ident;
+	bind re f = fn(ident: Type, indent: Type): Type => ident + ident;
 	let c = ident() |>
 		ident() |>
 		ident(_) |>
