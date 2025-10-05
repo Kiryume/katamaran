@@ -1,2 +1,4 @@
-be c = c
-be mut c = c
+be = c;
+be d = c;
+be mut d = c;
+be mut d c;
