@@ -84,12 +84,11 @@ impl Parse<BeStatement> for Parser {
             ));
             return None;
         }
-        let ident_token = self.tokenstream.next().unwrap();
-        let ident = self.parse()?;
+        let ident: Ident = self.parse()?;
         if !peek_is!(self.tokenstream, TokenTreeKind::Op(ref op) if op == &Op::Equal) {
             self.errors.push(format!(
                 "Expected '=' after identifier at line {}, column {}",
-                ident_token.pos.0, ident_token.pos.1
+                ident.pos.0, ident.pos.1
             ));
             return None?;
         } else {
