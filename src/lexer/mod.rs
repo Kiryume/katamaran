@@ -1,21 +1,25 @@
 pub mod types;
 
-use types::{Op, Source, StringParser, Token, TokenKind};
+use std::{iter::Peekable, str::Chars};
+
+use types::{Op, StringParser, Token, TokenKind};
 
 pub struct LexerCursor<'a> {
-    source: Source<'a>,
+    source: Peekable<Chars<'a>>,
     position: usize,
     column: usize,
     row: usize,
+    src: &'a str,
 }
 
 impl<'a> LexerCursor<'a> {
     pub fn new(input: &'a str) -> Self {
         LexerCursor {
-            source: Source::new(input),
+            source: input.chars().peekable(),
             position: 0,
             column: 0,
             row: 1,
+            src: input,
         }
     }
 
@@ -34,7 +38,7 @@ impl<'a> LexerCursor<'a> {
     }
 
     pub fn peek(&mut self) -> Option<char> {
-        self.source.peek()
+        self.source.peek().copied()
     }
 
     pub fn pos(&self) -> (usize, usize) {
@@ -53,7 +57,7 @@ impl<'a> LexerCursor<'a> {
                 break;
             }
         }
-        &self.source.src[start..self.position]
+        &self.src[start..self.position]
     }
 }
 

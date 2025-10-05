@@ -1,5 +1,3 @@
-use std::str::Chars;
-
 #[derive(Debug)]
 pub struct Token {
     pub kind: TokenKind,
@@ -69,41 +67,6 @@ pub enum Op {
     BitNot,
     ShiftLeft,
     ShiftRight,
-}
-
-pub struct Source<'a> {
-    iter: Chars<'a>,
-    peeked: Option<char>,
-    pub src: &'a str,
-}
-
-impl<'a> Source<'a> {
-    pub fn new(input: &'a str) -> Self {
-        Source {
-            iter: input.chars(),
-            peeked: None,
-            src: input,
-        }
-    }
-
-    pub fn peek(&mut self) -> Option<char> {
-        if self.peeked.is_none() {
-            self.peeked = self.iter.next();
-        }
-        self.peeked
-    }
-}
-
-impl Iterator for Source<'_> {
-    type Item = char;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if let Some(peeked) = self.peeked.take() {
-            Some(peeked)
-        } else {
-            self.iter.next()
-        }
-    }
 }
 
 pub struct StringParser {
