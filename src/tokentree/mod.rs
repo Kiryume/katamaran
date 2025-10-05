@@ -56,12 +56,12 @@ impl TokenTree {
     pub fn parse_from_tokens(
         iter: &mut impl Iterator<Item = Token>,
     ) -> Result<Vec<TokenTree>, String> {
-        let mut tokentrees = Vec::new();
+        let mut tokenstream = Vec::new();
         while let Some(token) = iter.next() {
             let tokentree = Self::token_to_tokentree(token, iter)?;
-            tokentrees.push(tokentree);
+            tokenstream.push(tokentree);
         }
-        Ok(tokentrees)
+        Ok(tokenstream)
     }
 
     fn token_to_tokentree(

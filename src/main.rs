@@ -21,8 +21,8 @@ fn run() -> Result<(), String> {
     let input = std::fs::read_to_string(args.input).expect("Failed to read input file");
     let mut lexer = lexer::LexerCursor::new(&input);
     let mut tokens = lexer.collect::<Result<Vec<_>, String>>()?;
-    let tokentrees = tokentree::TokenTree::parse_from_tokens(&mut tokens.into_iter())?;
-    println!("{:#?}", tokentrees);
+    let tokenstream = tokentree::TokenTree::parse_from_tokens(&mut tokens.into_iter())?;
+    println!("{:#?}", tokenstream);
 
     Ok(())
 }
