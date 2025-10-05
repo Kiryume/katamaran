@@ -117,15 +117,16 @@ impl Parse<BeStatement> for Parser {
 impl Parse<Expression> for Parser {
     fn parse(&mut self) -> Option<Expression> {
         let peeked = self.peek_token()?;
-        let (peeked_string, line, col) = (format!("{:?}", peeked.kind), peeked.pos.0, peeked.pos.1);
         let expr = match &peeked.kind {
             TokenTreeKind::Identifier(_) => {
                 let ident = self.parse()?;
                 Expression::Ident(ident)
             }
             _ => {
+                let (peeked_string, line, col) =
+                    (format!("{:?}", peeked.kind), peeked.pos.0, peeked.pos.1);
                 self.errors.push(format!(
-                    "Unexpected token '{:?}' at line {}, column {}",
+                    "Unexpected token '{}' at line {}, column {}",
                     peeked_string, line, col
                 ));
                 return None;
