@@ -23,6 +23,8 @@ fn run() -> Result<(), String> {
     let mut lexer = lexer::LexerCursor::new(&input);
     let mut tokens = lexer.collect::<Result<Vec<_>, String>>()?;
     let tokenstream = tokentree::TokenTree::parse_from_tokens(&mut tokens.into_iter())?;
+    let mut parser = parser::Parser::new(tokenstream);
+    let tokenstream = parser.parse_statements()?;
     println!("{:#?}", tokenstream);
 
     Ok(())
