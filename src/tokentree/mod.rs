@@ -1,5 +1,3 @@
-use core::fmt;
-
 use derivative::Derivative;
 
 use crate::lexer::types::{Op, Token, TokenKind};

@@ -20,9 +20,9 @@ fn main() {
 fn run() -> Result<(), String> {
     let args = Args::parse();
     let input =
-        std::fs::read_to_string(args.input).map_err(|s| "Failed to read input file".to_string())?;
-    let mut lexer = lexer::LexerCursor::new(&input);
-    let mut tokens = lexer.collect::<Result<Vec<_>, String>>()?;
+        std::fs::read_to_string(args.input).map_err(|_| "Failed to read input file".to_string())?;
+    let lexer = lexer::LexerCursor::new(&input);
+    let tokens = lexer.collect::<Result<Vec<_>, String>>()?;
     let tokenstream = tokentree::TokenTree::parse_from_tokens(&mut tokens.into_iter())?;
     let mut parser = parser::Parser::new(tokenstream);
     let ast: Vec<Statement> = parser.parse().unwrap();

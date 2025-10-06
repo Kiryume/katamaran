@@ -32,3 +32,14 @@ where
 {
     fn parse(&mut self) -> Option<T>;
 }
+
+enum Precedence {
+    Lowest = 1,
+    Equals,      // ==
+    LessGreater, // > or <
+    Sum,         // +
+    Product,     // *
+    Prefix,      // -X or !X
+    Call,        // myFunction(X)
+    Index,       // array[index]
+}
