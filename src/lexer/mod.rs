@@ -3,6 +3,7 @@ pub mod types;
 use std::{iter::Peekable, str::Chars};
 
 use types::{Op, StringParser, Token, TokenKind};
+use unicode_ident::{is_xid_continue, is_xid_start};
 
 pub struct LexerCursor<'a> {
     source: Peekable<Chars<'a>>,
@@ -180,9 +181,9 @@ impl Iterator for LexerCursor<'_> {
                     }
                 }
             }
-            c if c.is_ascii_alphabetic() || c == '_' => {
+            c if is_xid_start(c) || c == '_' => {
                 let mut ident_str = c.to_string();
-                ident_str.push_str(self.eat_while(|ch| ch.is_ascii_alphanumeric() || ch == '_'));
+                ident_str.push_str(self.eat_while(|ch| is_xid_continue(ch) || ch == '_'));
                 match ident_str.as_str() {
                     "be" => TokenKind::Be,
                     "mut" => TokenKind::Mut,
