@@ -1,3 +1,4 @@
+use types::ast::{ExpressionStatement, Literal, LiteralExpr, ReturnStatement};
 pub use types::{
     Parse, Parser,
     ast::{BeStatement, Expression, Ident, Pos, Statement},
@@ -58,11 +59,8 @@ impl Parse<Statement> for Parser {
         let peeked = self.peek_token()?;
         let stmt = match peeked.kind {
             TokenTreeKind::Be => Statement::Be(self.parse()?),
-            _ => {
-                self.tokenstream.next();
-                self.errors.push("Not yet implemented".to_string());
-                return None;
-            }
+            TokenTreeKind::Return => Statement::Return(self.parse()?),
+            _ => Statement::Expression(self.parse()?),
         };
         Some(stmt)
     }
@@ -114,14 +112,51 @@ impl Parse<BeStatement> for Parser {
     }
 }
 
+impl Parse<ReturnStatement> for Parser {
+    fn parse(&mut self) -> Option<ReturnStatement> {
+        let pos = self.tokenstream.next()?.pos;
+        let value: Expression = self.parse()?;
+        if !peek_is!(self.tokenstream, TokenTreeKind::SemiColon) {
+            self.errors.push(format!(
+                "Expected ';' after expression at line {}, column {}",
+                value.pos().0,
+                value.pos().1
+            ));
+            return None;
+        } else {
+            self.tokenstream.next();
+        }
+        Some(ReturnStatement { value, pos })
+    }
+}
+
+impl Parse<ExpressionStatement> for Parser {
+    fn parse(&mut self) -> Option<ExpressionStatement> {
+        let pos = self.tokenstream.peek()?.pos;
+        let expr: Expression = self.parse()?;
+        if !peek_is!(self.tokenstream, TokenTreeKind::SemiColon) {
+            self.errors.push(format!(
+                "Expected ';' after expression at line {}, column {}",
+                expr.pos().0,
+                expr.pos().1
+            ));
+            return None;
+        } else {
+            self.tokenstream.next();
+        }
+        Some(ExpressionStatement { expr, pos })
+    }
+}
+
 impl Parse<Expression> for Parser {
     fn parse(&mut self) -> Option<Expression> {
         let peeked = self.peek_token()?;
         let expr = match &peeked.kind {
-            TokenTreeKind::Identifier(_) => {
-                let ident = self.parse()?;
-                Expression::Ident(ident)
-            }
+            TokenTreeKind::Identifier(_) => Expression::Ident(self.parse()?),
+            TokenTreeKind::Integer(_)
+            | TokenTreeKind::Float(_)
+            | TokenTreeKind::Boolean(_)
+            | TokenTreeKind::String(_) => Expression::Literal(self.parse()?),
             _ => {
                 let (peeked_string, line, col) =
                     (format!("{:?}", peeked.kind), peeked.pos.0, peeked.pos.1);
@@ -151,5 +186,28 @@ impl Parse<Ident> for Parser {
             ));
             return None;
         }
+    }
+}
+
+impl Parse<LiteralExpr> for Parser {
+    fn parse(&mut self) -> Option<LiteralExpr> {
+        let token = self.tokenstream.next()?;
+        let literal = match &token.kind {
+            TokenTreeKind::Integer(value) => Literal::Int(*value),
+            TokenTreeKind::Float(value) => Literal::Float(*value),
+            TokenTreeKind::Boolean(value) => Literal::Bool(*value),
+            TokenTreeKind::String(value) => Literal::Str(value.clone()),
+            _ => {
+                self.errors.push(format!(
+                    "Expected literal, found '{:?}' at line {}, column {}",
+                    token.kind, token.pos.0, token.pos.1
+                ));
+                return None;
+            }
+        };
+        Some(LiteralExpr {
+            value: literal,
+            pos: token.pos,
+        })
     }
 }
