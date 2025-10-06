@@ -164,6 +164,7 @@ impl Parse<Expression> for Parser {
                     "Unexpected token '{}' at line {}, column {}",
                     peeked_string, line, col
                 ));
+                self.tokenstream.next();
                 return None;
             }
         };
