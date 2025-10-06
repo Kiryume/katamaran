@@ -1,5 +1,7 @@
 use std::{iter::Peekable, vec::IntoIter};
 
+use ast::Expression;
+
 use crate::tokentree::TokenTree;
 
 pub mod ast;
@@ -31,6 +33,13 @@ where
     T: Sized,
 {
     fn parse(&mut self) -> Option<T>;
+}
+
+pub trait InfixParse<T>
+where
+    T: Sized,
+{
+    fn parse(&mut self, expression: Expression) -> Expression;
 }
 
 enum Precedence {

@@ -67,6 +67,8 @@ pub struct LiteralExpr {
     pub pos: (usize, usize),
 }
 
+pub struct PrefixExpression {}
+
 impl Pos for Statement {
     fn pos(&self) -> (usize, usize) {
         match self {
