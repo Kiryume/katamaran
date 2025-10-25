@@ -2,7 +2,7 @@ mod lexer;
 mod parser;
 mod tokentree;
 use clap::Parser;
-use parser::{Parse, Statement};
+use parser::Statement;
 
 #[derive(Parser)]
 struct Args {
@@ -25,7 +25,7 @@ fn run() -> Result<(), String> {
     let tokens = lexer.collect::<Result<Vec<_>, String>>()?;
     let tokenstream = tokentree::TokenTree::parse_from_tokens(&mut tokens.into_iter())?;
     let mut parser = parser::Parser::new(tokenstream);
-    let ast: Vec<Statement> = parser.parse().unwrap();
+    let ast: Vec<Statement> = parser.parse_statements().unwrap();
     parser.errors.iter().for_each(|e| println!("{}", e));
     println!("{:#?}", ast);
 

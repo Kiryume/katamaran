@@ -24,7 +24,7 @@ pub struct BeStatement {
 #[derive(Derivative)]
 #[derivative(Debug)]
 pub struct ReturnStatement {
-    pub value: Expression,
+    pub expr: Expression,
     #[derivative(Debug = "ignore")]
     pub pos: (usize, usize),
 }

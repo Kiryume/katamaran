@@ -1,73 +1,45 @@
 use types::ast::{ExpressionStatement, Literal, LiteralExpr, ReturnStatement};
 pub use types::{
-    Parse, Parser,
+    Parser,
     ast::{BeStatement, Expression, Ident, Pos, Statement},
 };
 
 use crate::{lexer::types::Op, tokentree::TokenTreeKind};
 
 pub mod types;
+
 #[macro_export]
 macro_rules! peek_is {
     ($iter:expr, $($pat:tt)+) => {
         $iter.peek().is_some_and(|tok| matches!(tok.kind, $($pat)+))
     };
 }
-#[macro_export]
-macro_rules! extract {
-    ($enum:ident :: $variant:ident ( $($pat:pat),* ) = $expr:expr, $name:ident) => {{
-        if let $enum::$variant($($pat),*) = $expr {
-            $name
-        } else {
-            unreachable!(
-                "Expected {}::{} variant",
-                stringify!($enum),
-                stringify!($variant)
-            )
-        }
-    }};
 
-    ($enum:ident :: $variant:ident { $($pat:tt)* } = $expr:expr, $name:ident) => {{
-        if let $enum::$variant { $($pat)* } = $expr {
-            $name
-        } else {
-            unreachable!(
-                "Expected {}::{} variant",
-                stringify!($enum),
-                stringify!($variant)
-            )
-        }
-    }};
-}
-impl Parse<Vec<Statement>> for Parser {
-    fn parse(&mut self) -> Option<Vec<Statement>> {
-        let mut root = Vec::new();
+impl Parser {
+    pub fn parse_statements(&mut self) -> Option<Vec<Statement>> {
+        let mut statements = Vec::new();
         loop {
             if self.tokenstream.peek().is_none() {
                 break;
             }
-            if let Some(stmt) = self.parse() {
-                root.push(stmt);
+            if let Some(stmt) = self.parse_statement() {
+                statements.push(stmt);
             }
         }
-        Some(root)
+        Some(statements)
     }
-}
 
-impl Parse<Statement> for Parser {
-    fn parse(&mut self) -> Option<Statement> {
+    fn parse_statement(&mut self) -> Option<Statement> {
         let peeked = self.peek_token()?;
         let stmt = match peeked.kind {
-            TokenTreeKind::Be => Statement::Be(self.parse()?),
-            TokenTreeKind::Return => Statement::Return(self.parse()?),
-            _ => Statement::Expression(self.parse()?),
+            TokenTreeKind::Be => Statement::Be(self.parse_be_statement()?),
+            TokenTreeKind::Return => Statement::Return(self.parse_return_statement()?),
+            _ => Statement::Expression(self.parse_expression_statement()?),
         };
         Some(stmt)
     }
-}
 
-impl Parse<BeStatement> for Parser {
-    fn parse(&mut self) -> Option<BeStatement> {
+    fn parse_be_statement(&mut self) -> Option<BeStatement> {
         let pos = self.tokenstream.next().unwrap().pos;
         let is_mut = if peek_is!(self.tokenstream, TokenTreeKind::Mut) {
             self.tokenstream.next();
@@ -82,17 +54,17 @@ impl Parse<BeStatement> for Parser {
             ));
             return None;
         }
-        let ident: Ident = self.parse()?;
+        let ident: Ident = self.parse_ident()?;
         if !peek_is!(self.tokenstream, TokenTreeKind::Op(ref op) if op == &Op::Equal) {
             self.errors.push(format!(
                 "Expected '=' after identifier at line {}, column {}",
                 ident.pos.0, ident.pos.1
             ));
-            return None?;
+            return None;
         } else {
             self.tokenstream.next();
         }
-        let value: Expression = self.parse()?;
+        let value: Expression = self.parse_expression()?;
         if !peek_is!(self.tokenstream, TokenTreeKind::SemiColon) {
             self.errors.push(format!(
                 "Expected ';' after expression at line {}, column {}",
@@ -110,30 +82,26 @@ impl Parse<BeStatement> for Parser {
             pos,
         })
     }
-}
 
-impl Parse<ReturnStatement> for Parser {
-    fn parse(&mut self) -> Option<ReturnStatement> {
+    fn parse_return_statement(&mut self) -> Option<ReturnStatement> {
         let pos = self.tokenstream.next()?.pos;
-        let value: Expression = self.parse()?;
+        let expr: Expression = self.parse_expression()?;
         if !peek_is!(self.tokenstream, TokenTreeKind::SemiColon) {
             self.errors.push(format!(
                 "Expected ';' after expression at line {}, column {}",
-                value.pos().0,
-                value.pos().1
+                expr.pos().0,
+                expr.pos().1
             ));
             return None;
         } else {
             self.tokenstream.next();
         }
-        Some(ReturnStatement { value, pos })
+        Some(ReturnStatement { expr, pos })
     }
-}
 
-impl Parse<ExpressionStatement> for Parser {
-    fn parse(&mut self) -> Option<ExpressionStatement> {
+    fn parse_expression_statement(&mut self) -> Option<ExpressionStatement> {
         let pos = self.tokenstream.peek()?.pos;
-        let expr: Expression = self.parse()?;
+        let expr: Expression = self.parse_expression()?;
         if !peek_is!(self.tokenstream, TokenTreeKind::SemiColon) {
             self.errors.push(format!(
                 "Expected ';' after expression at line {}, column {}",
@@ -146,17 +114,15 @@ impl Parse<ExpressionStatement> for Parser {
         }
         Some(ExpressionStatement { expr, pos })
     }
-}
 
-impl Parse<Expression> for Parser {
-    fn parse(&mut self) -> Option<Expression> {
+    fn parse_expression(&mut self) -> Option<Expression> {
         let peeked = self.peek_token()?;
         let expr = match &peeked.kind {
-            TokenTreeKind::Identifier(_) => Expression::Ident(self.parse()?),
+            TokenTreeKind::Identifier(_) => Expression::Ident(self.parse_ident()?),
             TokenTreeKind::Integer(_)
             | TokenTreeKind::Float(_)
             | TokenTreeKind::Boolean(_)
-            | TokenTreeKind::String(_) => Expression::Literal(self.parse()?),
+            | TokenTreeKind::String(_) => Expression::Literal(self.parse_literal()?),
             _ => {
                 let (peeked_string, line, col) =
                     (format!("{:?}", peeked.kind), peeked.pos.0, peeked.pos.1);
@@ -170,10 +136,8 @@ impl Parse<Expression> for Parser {
         };
         Some(expr)
     }
-}
 
-impl Parse<Ident> for Parser {
-    fn parse(&mut self) -> Option<Ident> {
+    fn parse_ident(&mut self) -> Option<Ident> {
         let token = self.tokenstream.next()?;
         if let TokenTreeKind::Identifier(name) = &token.kind {
             Some(Ident {
@@ -185,13 +149,11 @@ impl Parse<Ident> for Parser {
                 "Expected identifier, found '{:?}' at line {}, column {}",
                 token.kind, token.pos.0, token.pos.1
             ));
-            return None;
+            None
         }
     }
-}
 
-impl Parse<LiteralExpr> for Parser {
-    fn parse(&mut self) -> Option<LiteralExpr> {
+    fn parse_literal(&mut self) -> Option<LiteralExpr> {
         let token = self.tokenstream.next()?;
         let literal = match &token.kind {
             TokenTreeKind::Integer(value) => Literal::Int(*value),
