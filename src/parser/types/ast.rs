@@ -1,54 +1,55 @@
 use derivative::Derivative;
 
-pub trait Pos {
-    fn pos(&self) -> (usize, usize);
+#[derive(Derivative)]
+#[derivative(Debug)]
+pub struct Stmt {
+    pub kind: StmtKind,
+    #[derivative(Debug = "ignore")]
+    pub pos: (usize, usize),
 }
 
 #[derive(Debug)]
-pub enum Statement {
-    Be(BeStatement),
-    Return(ReturnStatement),
-    Expression(ExpressionStatement),
+pub enum StmtKind {
+    Be(BeStmt),
+    Return(ReturnStmt),
+    Expression(ExpressionStmt),
 }
 
-#[derive(Derivative)]
-#[derivative(Debug)]
-pub struct BeStatement {
+#[derive(Debug)]
+pub struct BeStmt {
     pub ident: Ident,
     pub value: Expression,
     pub is_mut: bool,
-    #[derivative(Debug = "ignore")]
+}
+
+#[derive(Debug)]
+pub struct ReturnStmt {
+    pub expr: Expression,
+}
+
+#[derive(Debug)]
+pub struct ExpressionStmt {
+    pub expr: Expression,
     pub pos: (usize, usize),
 }
 
 #[derive(Derivative)]
 #[derivative(Debug)]
-pub struct ReturnStatement {
-    pub expr: Expression,
-    #[derivative(Debug = "ignore")]
-    pub pos: (usize, usize),
-}
-
-#[derive(Derivative)]
-#[derivative(Debug)]
-pub struct ExpressionStatement {
-    pub expr: Expression,
+pub struct Expression {
+    pub kind: ExpressionKind,
     #[derivative(Debug = "ignore")]
     pub pos: (usize, usize),
 }
 
 #[derive(Debug)]
-pub enum Expression {
+pub enum ExpressionKind {
     Ident(Ident),
     Literal(LiteralExpr),
 }
 
-#[derive(Derivative)]
-#[derivative(Debug)]
+#[derive(Debug)]
 pub struct Ident {
     pub name: String,
-    #[derivative(Debug = "ignore")]
-    pub pos: (usize, usize),
 }
 
 #[derive(Debug)]
@@ -63,57 +64,4 @@ pub enum Literal {
 #[derivative(Debug)]
 pub struct LiteralExpr {
     pub value: Literal,
-    #[derivative(Debug = "ignore")]
-    pub pos: (usize, usize),
-}
-
-pub struct PrefixExpression {}
-
-impl Pos for Statement {
-    fn pos(&self) -> (usize, usize) {
-        match self {
-            Statement::Be(be_stmt) => be_stmt.pos(),
-            Statement::Return(ret_stmt) => ret_stmt.pos(),
-            Statement::Expression(expr) => expr.pos(),
-        }
-    }
-}
-
-impl Pos for BeStatement {
-    fn pos(&self) -> (usize, usize) {
-        self.pos
-    }
-}
-
-impl Pos for ReturnStatement {
-    fn pos(&self) -> (usize, usize) {
-        self.pos
-    }
-}
-
-impl Pos for ExpressionStatement {
-    fn pos(&self) -> (usize, usize) {
-        self.pos
-    }
-}
-
-impl Pos for Expression {
-    fn pos(&self) -> (usize, usize) {
-        match self {
-            Expression::Ident(ident) => ident.pos(),
-            Expression::Literal(lit) => lit.pos(),
-        }
-    }
-}
-
-impl Pos for Ident {
-    fn pos(&self) -> (usize, usize) {
-        self.pos
-    }
-}
-
-impl Pos for LiteralExpr {
-    fn pos(&self) -> (usize, usize) {
-        self.pos
-    }
 }
