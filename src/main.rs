@@ -1,5 +1,11 @@
+mod ast;
 mod lexer;
+mod parser;
+mod types;
+
 use clap::Parser;
+use lexer::types::LexerError;
+use miette::{IntoDiagnostic, NamedSource, Report, Result};
 
 #[derive(Parser)]
 struct Args {
@@ -8,19 +14,15 @@ struct Args {
 }
 
 fn main() {
-    if let Err(e) = run() {
-        eprintln!("Error: {}", e);
+    if let Err(report) = run() {
+        eprintln!("{report:?}");
         std::process::exit(1);
     }
 }
 
-fn run() -> Result<(), String> {
+fn run() -> Result<()> {
     let args = Args::parse();
-    let input =
-        std::fs::read_to_string(args.input).map_err(|_| "Failed to read input file".to_string())?;
+    let input = std::fs::read_to_string(&args.input).into_diagnostic()?;
     let lexer = lexer::LexerCursor::new(&input);
-    let tokens = lexer.collect::<Result<Vec<_>, String>>()?;
-    println!("{:#?}", tokens);
-
     Ok(())
 }

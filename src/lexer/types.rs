@@ -1,11 +1,17 @@
+use std::num::{ParseFloatError, ParseIntError};
+
 use derivative::Derivative;
+use miette::Diagnostic;
+use thiserror::Error;
+
+use crate::types::SrcSpan;
 
 #[derive(Derivative)]
 #[derivative(Debug)]
 pub struct Token {
     pub kind: TokenKind,
     #[derivative(Debug = "ignore")]
-    pub pos: (usize, usize),
+    pub span: SrcSpan,
 }
 
 #[derive(Debug)]
@@ -34,6 +40,43 @@ pub enum TokenKind {
     Float(f64),
 
     Op(Op),
+}
+
+#[derive(Debug, Error, Diagnostic)]
+pub enum LexerError {
+    #[error("unexpected character {found:?}")]
+    #[diagnostic(code(lexer::unexpected_character))]
+    #[help("remove the character or extend the grammar to accept it")]
+    UnexpectedCharacter {
+        found: char,
+        #[label("unexpected character")]
+        span: SrcSpan,
+    },
+    #[error("invalid integer literal")]
+    #[diagnostic(code(lexer::invalid_integer_literal))]
+    InvalidIntegerLiteral {
+        literal: String,
+        #[label("invalid integer literal")]
+        span: SrcSpan,
+        #[source]
+        source: ParseIntError,
+    },
+    #[error("invalid float literal")]
+    #[diagnostic(code(lexer::invalid_float_literal))]
+    InvalidFloatLiteral {
+        literal: String,
+        #[label("invalid float literal")]
+        span: SrcSpan,
+        #[source]
+        source: ParseFloatError,
+    },
+    #[error("unterminated string literal")]
+    #[diagnostic(code(lexer::unterminated_string))]
+    #[help("add a closing quote to complete the string")]
+    UnterminatedString {
+        #[label("string literal starts here")]
+        span: SrcSpan,
+    },
 }
 
 #[derive(PartialEq, Debug)]
