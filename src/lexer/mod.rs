@@ -84,12 +84,24 @@ impl Iterator for LexerCursor<'_> {
             '*' => TokenKind::Op(Op::Multiply),
             '/' => TokenKind::Op(Op::Divide),
             '%' => TokenKind::Op(Op::Modulo),
+            '.' => TokenKind::Op(Op::Dot),
             '=' => {
-                if self.peek() == Some('=') {
-                    self.bump();
-                    TokenKind::Op(Op::EqualTo)
-                } else {
-                    TokenKind::Op(Op::Equal)
+                // if self.peek() == Some('=') {
+                //     self.bump();
+                //     TokenKind::Op(Op::EqualTo)
+                // } else {
+                //     TokenKind::Op(Op::Equal)
+                // }
+                match self.peek() {
+                    Some('=') => {
+                        self.bump();
+                        TokenKind::Op(Op::EqualTo)
+                    }
+                    Some('>') => {
+                        self.bump();
+                        TokenKind::Arrow
+                    }
+                    _ => TokenKind::Op(Op::Equal),
                 }
             }
             '!' => {
@@ -105,20 +117,12 @@ impl Iterator for LexerCursor<'_> {
                     self.bump();
                     TokenKind::Op(Op::GreaterThanOrEqual)
                 }
-                Some('>') => {
-                    self.bump();
-                    TokenKind::Op(Op::ShiftRight)
-                }
                 _ => TokenKind::Op(Op::GreaterThan),
             },
             '<' => match self.peek() {
                 Some('=') => {
                     self.bump();
                     TokenKind::Op(Op::LessThanOrEqual)
-                }
-                Some('<') => {
-                    self.bump();
-                    TokenKind::Op(Op::ShiftLeft)
                 }
                 _ => TokenKind::Op(Op::LessThan),
             },
@@ -127,7 +131,10 @@ impl Iterator for LexerCursor<'_> {
                     self.bump();
                     TokenKind::Op(Op::And)
                 } else {
-                    TokenKind::Op(Op::BitAnd)
+                    return Some(Err(format!(
+                        "Unexpected character '&' at line {}, column {}",
+                        line, column
+                    )));
                 }
             }
             '|' => match self.peek() {
@@ -139,10 +146,13 @@ impl Iterator for LexerCursor<'_> {
                     self.bump();
                     TokenKind::Op(Op::Pipe)
                 }
-                _ => TokenKind::Op(Op::BitOr),
+                _ => {
+                    return Some(Err(format!(
+                        "Unexpected character '|' at line {}, column {}",
+                        line, column
+                    )));
+                }
             },
-            '^' => TokenKind::Op(Op::BitXor),
-            '~' => TokenKind::Op(Op::BitNot),
             '"' => {
                 let mut string_parser = StringParser::new();
                 let string_content = self.eat_while(|c| string_parser.condition(c));
@@ -185,17 +195,11 @@ impl Iterator for LexerCursor<'_> {
                 let mut ident_str = c.to_string();
                 ident_str.push_str(self.eat_while(|ch| is_xid_continue(ch) || ch == '_'));
                 match ident_str.as_str() {
-                    "be" => TokenKind::Be,
-                    "mut" => TokenKind::Mut,
-                    "if" => TokenKind::If,
-                    "else" => TokenKind::Else,
-                    "while" => TokenKind::While,
+                    "let" => TokenKind::Let,
                     "fn" => TokenKind::Fn,
-                    "return" => TokenKind::Return,
+                    "match" => TokenKind::Match,
                     "true" => TokenKind::Boolean(true),
                     "false" => TokenKind::Boolean(false),
-                    "struct" => TokenKind::Struct,
-                    "enum" => TokenKind::Enum,
                     _ => TokenKind::Identifier(ident_str),
                 }
             }

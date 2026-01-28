@@ -1,28 +1,19 @@
-struct Ident {
-    field: Type,
-    field2: Type2<T>,
-    field3: Type3,
+fn b x = x.value + 3
+fn c x = {
+    return x.value + 3;
 }
-
-enum Ident {
-    Variant(Type),
-	Variant2 {
-		field: Type,
-		field: Type<T>,
-	}
+fn d x = x |> c
+fn e x = c(x)
+fn g x = {
+   let y = x |> c;
+   let z = c(x);
+   z + y
 }
-
-fn main(ident: Type, ident: Type): () {
-    be c = Ident::new();
-    be mut c = {
-		iden + idenl
-	}
-	if iden == iden {
-		c = "Ahoj";
-	}
-	bind re f = fn(ident: Type, indent: Type): Type => ident + ident;
-	let c = ident() |>
-		ident() |>
-		ident(_) |>
-		ident(c, _);
-}
+fn append l e = Table.insert(l, Table.size(l), e)
+let c = {}
+let g = c |> append(_, 5)
+match Table.get(0, g) {
+    1 => "One",
+	5 => "Five",
+	_ => "Something Else"
+} => Io.print

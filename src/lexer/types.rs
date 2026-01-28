@@ -1,24 +1,20 @@
-#[derive(Debug)]
+use derivative::Derivative;
+
+#[derive(Derivative)]
+#[derivative(Debug)]
 pub struct Token {
     pub kind: TokenKind,
+    #[derivative(Debug = "ignore")]
     pub pos: (usize, usize),
 }
 
 #[derive(Debug)]
 pub enum TokenKind {
-    Be,
-    Mut,
-    If,
-    Else,
-    While,
-    // For,
+    Let,
     Fn,
-    Return,
 
-    Struct,
-    Enum,
-
-    Boolean(bool),
+    Match,
+    Arrow,
 
     Comma,
     Colon,
@@ -32,6 +28,7 @@ pub enum TokenKind {
     RBracket,
 
     Identifier(String),
+    Boolean(bool),
     String(String),
     Integer(i64),
     Float(f64),
@@ -43,14 +40,16 @@ pub enum TokenKind {
 pub enum Op {
     Pipe,
 
+    Dot,
+
     Plus,
     Minus,
     Multiply,
     Divide,
     Modulo,
 
-    Equal,
-    EqualTo,
+    Equal,   // =
+    EqualTo, // ==
     NotEqual,
     GreaterThan,
     LessThan,
@@ -60,13 +59,12 @@ pub enum Op {
     And,
     Or,
     Not,
-
-    BitAnd,
-    BitOr,
-    BitXor,
-    BitNot,
-    ShiftLeft,
-    ShiftRight,
+    // BitAnd,
+    // BitOr,
+    // BitXor,
+    // BitNot,
+    // ShiftLeft,
+    // ShiftRight,
 }
 
 pub struct StringParser {
