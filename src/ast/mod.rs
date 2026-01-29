@@ -31,6 +31,8 @@ pub struct Expr {
 
 pub enum ExprKind {
     Ident(Ident),
+    Fn(AnonFn),
+    Block(Block),
     Lit(Lit),
     Match(Match),
     UnOp(UnOp),
@@ -39,6 +41,17 @@ pub enum ExprKind {
 
 pub struct Ident {
     pub name: String,
+    pub span: SrcSpan,
+}
+
+pub struct AnonFn {
+    pub args: Vec<Ident>,
+    pub body: Block,
+    pub span: SrcSpan,
+}
+
+pub struct Block {
+    pub exprs: Vec<Expr>,
     pub span: SrcSpan,
 }
 

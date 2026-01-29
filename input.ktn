@@ -1,17 +1,18 @@
 fn b x = x.value + 3
 fn c x = {
-    return x.value + 3;
+    x.value + 3
 }
 fn d x = x |> c
 fn e x = c(x)
 fn g x = {
    let y = x |> c;
-   let z = c(x);
+   let z = c(x)
    z + y
 }
 fn append l e = Table.insert(l, Table.size(l), e)
 let c = {}
 let g = c |> append(_, 5)
+let h = fn x { x.value + 3 }
 match Table.get(0, g) {
     1 => "One",
 	5 => "Five",

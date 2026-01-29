@@ -2,11 +2,13 @@ pub mod types;
 
 use std::{iter::Peekable, str::Chars};
 
-use miette::{Result, SourceOffset, SourceSpan};
+use miette::Result;
 use types::{LexerError, Op, StringParser, Token, TokenKind};
 use unicode_ident::{is_xid_continue, is_xid_start};
 
 use crate::types::SrcSpan;
+
+pub type LexResult = Result<Token, LexerError>;
 
 pub struct LexerCursor<'a> {
     source: Peekable<Chars<'a>>,
@@ -62,7 +64,7 @@ impl<'a> LexerCursor<'a> {
 }
 
 impl Iterator for LexerCursor<'_> {
-    type Item = Result<Token, LexerError>;
+    type Item = LexResult;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.eat_while(char::is_whitespace);
